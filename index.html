@@ -21,7 +21,7 @@
 
     <main>
         <aside aria-label="분석 준비 상태" class="loading-status">
-            <p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p>
+            <p id="status" role="status">원하는 산업 분류 카드를 선택하여 자료를 불러오세요.</p>
             <details>
                 <summary>계수 검증 결과</summary>
                 <pre id="validation">아직 자료를 불러오지 않았습니다.</pre>
@@ -31,33 +31,32 @@
         <section id="explorer">
             <div class="section-heading">
                 <h2>1. 원자료 탐색</h2>
-                <button id="load-basic" type="button">기본부문 불러오기</button>
+                <!-- 기존 "기본부문 불러오기" 버튼은 내부 동작용으로 숨김 처리 -->
+                <button id="load-basic" type="button" style="display: none;"></button>
             </div>
 
-            <!-- === [추가] 대·중·소·기본부문 선택 카드 영역 === -->
+            <p>원하는 산업 분류 체계 카드를 클릭하세요.</p>
+
+            <!-- === 대·중·소·기본부문 카드 UI (클릭 시 해당 분류로 바로 작동) === -->
             <div style="display: flex; gap: 16px; margin: 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                <!-- 대분류 상자 -->
                 <div class="io-select-card" data-type="대분류" style="flex: 1; background: #f0f4f8; border: 2px solid transparent; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
                     <div style="font-size: 15px; color: #334e68; margin-bottom: 8px;">대분류</div>
                     <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #102a43; margin-bottom: 8px;">33</div>
                     <div style="font-size: 13px; color: #627d98;">개 산업 (0.6MB)</div>
                 </div>
 
-                <!-- 중분류 상자 -->
                 <div class="io-select-card" data-type="중분류" style="flex: 1; background: #f0f4f8; border: 2px solid transparent; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
                     <div style="font-size: 15px; color: #334e68; margin-bottom: 8px;">중분류</div>
                     <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #102a43; margin-bottom: 8px;">83</div>
                     <div style="font-size: 13px; color: #627d98;">개 산업 (1.2MB)</div>
                 </div>
 
-                <!-- 소분류 상자 -->
                 <div class="io-select-card" data-type="소분류" style="flex: 1; background: #f0f4f8; border: 2px solid transparent; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
                     <div style="font-size: 15px; color: #334e68; margin-bottom: 8px;">소분류</div>
                     <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #102a43; margin-bottom: 8px;">165</div>
                     <div style="font-size: 13px; color: #627d98;">개 산업 (3.1MB)</div>
                 </div>
 
-                <!-- 기본부문 상자 (기본 선택 상태) -->
                 <div class="io-select-card selected" data-type="기본부문" style="flex: 1; background: #e1effe; border: 2px solid #3182ce; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
                     <div style="font-size: 15px; color: #1e40af; margin-bottom: 8px;">기본부문</div>
                     <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 8px;">380</div>
@@ -65,8 +64,12 @@
                 </div>
             </div>
 
+            <!-- 기존에 화면에 보이던 방해되는 드롭다운 셀렉트 박스는 화면에서 숨김 처리 (앱 내부 호환용) -->
+            <div style="display: none;">
+                <label>시트<select id="sheet"></select></label>
+            </div>
+
             <p>선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
-            <label>시트<select disabled="" id="sheet"></select></label>
             <label>행 이름 검색<input disabled="" id="row-search" placeholder="예: 자동차, 부가가치"/></label>
             <label>행 선택<select disabled="" id="row"></select></label>
             <p id="unit"></p>
@@ -117,15 +120,16 @@
 
     <footer>브라우저 계산 · GitHub Pages 배포용</footer>
 
-    <!-- === [카드 선택 및 기존 버튼 자동 연동 스크립트] === -->
+    <!-- === 카드 클릭 시 해당 분류 데이터가 정확히 연동되도록 조작하는 스크립트 === -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.io-select-card');
         const loadBtn = document.getElementById('load-basic');
+        const hiddenSheetSelect = document.getElementById('sheet');
 
         cards.forEach(card => {
             card.addEventListener('click', () => {
-                // 1. 모든 카드의 스타일을 연한 하늘색 기본 스타일로 초기화
+                // 1. 모든 카드 스타일 초기화
                 cards.forEach(c => {
                     c.style.background = '#f0f4f8';
                     c.style.border = '2px solid transparent';
@@ -133,15 +137,23 @@
                     c.querySelector('.card-main-text').style.color = '#102a43';
                 });
 
-                // 2. 내가 선택한 카드를 파란색으로 강조
+                // 2. 클릭한 카드만 파란색 강조
                 card.style.background = '#e1effe';
                 card.style.border = '2px solid #3182ce';
                 card.querySelector('div:first-child').style.color = '#1e40af';
                 card.querySelector('.card-main-text').style.color = '#1e3a8a';
 
+                // 3. 선택한 분류명(대분류, 중분류, 소분류, 기본부문) 가져오기
                 const selectedType = card.getAttribute('data-type');
+                console.log("선택된 분류:", selectedType);
 
-                // 3. 기존 "기본부문 불러오기" 버튼을 자동으로 눌러 파이썬 실행
+                // 4. 앱 내부의 숨겨진 시트 선택창 값을 변경하고 데이터 로드 트리거
+                if (hiddenSheetSelect) {
+                    // 앱이 인식할 수 있도록 옵션 값을 맞추거나 직접 설정
+                    hiddenSheetSelect.value = selectedType;
+                }
+
+                // 5. 데이터 로드 버튼 자동 클릭 실행
                 if (loadBtn) {
                     loadBtn.click();
                 }
