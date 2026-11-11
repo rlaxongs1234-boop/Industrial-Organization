@@ -90,32 +90,3 @@ loadButton.onclick = async () => {
     loadButton.disabled = false;
   }
 };
-// 카드를 클릭했을 때 디자인이 파란색으로 바뀌고, 원래 작동하던 데이터 로딩이 실행되게 함
-document.addEventListener('DOMContentLoaded', () => {
-    const cards = document.querySelectorAll('.io-card');
-
-    cards.forEach(card => {
-        card.addEventListener('click', () => {
-            // 1. 모든 카드의 파란 테두리/배경 초기화
-            cards.forEach(c => {
-                c.style.background = '#fff';
-                c.style.border = '1px solid #e1e4e8';
-                c.querySelector('.card-num').style.color = '#212529';
-                c.querySelector('.card-title').style.color = '#495057';
-            });
-            
-            // 2. 내가 클릭한 카드만 파란색으로 강조
-            card.style.background = '#ebf8ff';
-            card.style.border = '2px solid #3182ce';
-            card.querySelector('.card-num').style.color = '#2b6cb0';
-            card.querySelector('.card-title').style.color = '#2b6cb0';
-
-            // 3. 선택된 분류값 가져오기 (대분류, 중분류, 소분류, 기본부문)
-            const selectedType = card.getAttribute('data-type');
-            
-            // 👉 [중요] 여기에 기존에 원래 작동하던 데이터 로딩 함수를 넣어주세요!
-            // 예시: loadData(selectedType); 또는 기존 버튼 클릭 함수와 연결
-            console.log("선택된 분류:", selectedType);
-        });
-    });
-});
