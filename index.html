@@ -1,171 +1,136 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width,initial-scale=1" name="viewport"/>
-    <title>과제물1: 산업연관표분석 웹앱</title>
-    <link href="./style.css" rel="stylesheet"/>
-    <script defer="" src="./app.js"></script>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>과제물1: 산업연관표분석 웹앱</title>
+<link href="./style.css" rel="stylesheet"/>
+<style>
+.io-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin:20px 0}
+.io-select-card{background:#f0f4f8;border:2px solid transparent;border-radius:12px;padding:20px;cursor:pointer;text-align:left;font:inherit;color:#334e68;transition:all .2s}
+.io-select-card:hover{border-color:#90cdf4}
+.io-select-card .t{font-size:15px;margin-bottom:8px}
+.io-select-card .n{font-size:24px;font-weight:bold;color:#102a43;margin-bottom:8px}
+.io-select-card .s{font-size:13px;color:#627d98}
+.io-select-card.selected{background:#e1effe;border-color:#3182ce;color:#1e40af}
+.io-select-card.selected .n{color:#1e3a8a}
+.io-select-card.selected .s{color:#3b82f6}
+.io-select-card:disabled{opacity:.6;cursor:wait}
+.row-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.tag-key{font-weight:bold;color:#1e40af}
+</style>
+<script defer src="./app.js"></script>
 </head>
 <body>
-    <header>
-        <p>2023 · 생산자가격 · 기본부문</p>
-        <h1>과제물1: 산업연관표분석 웹앱</h1>
-        <p>12개 원자료 시트 탐색과 380개 부문 수요충격 분석</p>
-    </header>
+<header>
+<p>2023 · 생산자가격 · 대분류·중분류·소분류·기본부문</p>
+<h1>과제물1: 산업연관표분석 웹앱</h1>
+<p>원자료 시트 탐색 · 수요충격 파급효과 · 연쇄효과(핵심산업) 분석</p>
+</header>
 
-    <nav aria-label="주요 메뉴">
-        <a href="#explorer">원자료 탐색</a>
-        <a href="#simulation">시뮬레이터</a>
-    </nav>
+<nav aria-label="주요 메뉴">
+<a href="#explorer">원자료 탐색</a>
+<a href="#simulation">시뮬레이터</a>
+<a href="#linkage">연쇄효과</a>
+</nav>
 
-    <main>
-        <aside aria-label="분석 준비 상태" class="loading-status">
-            <p id="status" role="status">아래 카드를 클릭하면 해당 분류 데이터가 즉시 로드됩니다.</p>
-            <details>
-                <summary>계수 검증 결과</summary>
-                <pre id="validation">아직 자료를 불러오지 않았습니다.</pre>
-            </details>
-        </aside>
+<main>
+<aside aria-label="분석 준비 상태" class="loading-status">
+<p id="status" role="status">아래 카드를 클릭하면 해당 분류 데이터가 로드됩니다.</p>
+<details>
+<summary>계수 검증 결과</summary>
+<pre id="validation">아직 자료를 불러오지 않았습니다.</pre>
+</details>
+</aside>
 
-        <section id="explorer">
-            <div class="section-heading">
-                <h2>1. 원자료 탐색</h2>
-                <!-- 내부 실행용 버튼 (화면 숨김) -->
-                <button id="load-basic" type="button" style="display: none;"></button>
-            </div>
+<section id="explorer">
+<div class="section-heading"><h2>1. 원자료 탐색</h2></div>
 
-            <!-- === 대·중·소·기본부문 선택 카드 UI (정확한 시트 매핑 값 적용) === -->
-            <div style="display: flex; gap: 16px; margin: 20px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                <div class="io-select-card" data-sheet="대분류" style="flex: 1; background: #f0f4f8; border: 2px solid transparent; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
-                    <div style="font-size: 15px; color: #334e68; margin-bottom: 8px;">대분류</div>
-                    <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #102a43; margin-bottom: 8px;">33</div>
-                    <div style="font-size: 13px; color: #627d98;">개 산업 (0.6MB)</div>
-                </div>
+<div class="io-cards" role="group" aria-label="분류 선택">
+<button type="button" class="io-select-card" data-label="대분류"><div class="t">대분류</div><div class="n">33</div><div class="s">개 산업 (0.6MB)</div></button>
+<button type="button" class="io-select-card" data-label="중분류"><div class="t">중분류</div><div class="n">83</div><div class="s">개 산업 (1.2MB)</div></button>
+<button type="button" class="io-select-card" data-label="소분류"><div class="t">소분류</div><div class="n">165</div><div class="s">개 산업 (3.1MB)</div></button>
+<button type="button" class="io-select-card" data-label="기본부문"><div class="t">기본부문</div><div class="n">380</div><div class="s">개 산업 (12.3MB)</div></button>
+</div>
 
-                <div class="io-select-card" data-sheet="중분류" style="flex: 1; background: #f0f4f8; border: 2px solid transparent; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
-                    <div style="font-size: 15px; color: #334e68; margin-bottom: 8px;">중분류</div>
-                    <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #102a43; margin-bottom: 8px;">83</div>
-                    <div style="font-size: 13px; color: #627d98;">개 산업 (1.2MB)</div>
-                </div>
+<p>선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
+<div class="row-tools">
+<label>시트 선택 <select disabled id="sheet"></select></label>
+<label>행 이름 검색<input disabled id="row-search" placeholder="예: 자동차, 부가가치"/></label>
+<label>행 선택<select disabled id="row"></select></label>
+<label>열 검색<input disabled id="col-search" placeholder="열 이름 또는 코드"/></label>
+</div>
+<p id="unit"></p>
+<div class="scroll">
+<table>
+<caption id="explore-caption">자료를 불러온 후 표시됩니다.</caption>
+<thead><tr><th>열 코드</th><th>열 이름</th><th>원자료 값</th></tr></thead>
+<tbody id="cells"></tbody>
+</table>
+</div>
+<p class="note">스크롤하여 전체 열을 볼 수 있습니다. 금액표의 일반 데이터 단위는 백만원입니다. 구성비·유발계수 등 요약 행은 행 명칭을 우선 확인하세요.</p>
+</section>
 
-                <div class="io-select-card" data-sheet="소분류" style="flex: 1; background: #f0f4f8; border: 2px solid transparent; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
-                    <div style="font-size: 15px; color: #334e68; margin-bottom: 8px;">소분류</div>
-                    <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #102a43; margin-bottom: 8px;">165</div>
-                    <div style="font-size: 13px; color: #627d98;">개 산업 (3.1MB)</div>
-                </div>
+<section id="simulation">
+<h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2>
+<p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p>
+<label>산업 검색<input disabled id="sector-search" placeholder="산업 이름 또는 코드"/></label>
+<form id="scenario">
+<label>산업<select disabled id="sector" required></select></label>
+<label>증가액 (백만원)<input disabled id="amount" min="0.01" required step="any" type="number" value="1000"/></label>
+<p class="note">1,000백만원 = 10억원. 이번 버전은 양의 수요 증가만 지원합니다.</p>
+<button disabled id="add">시나리오에 추가</button>
+</form>
+<ul id="basket"></ul>
+<button disabled id="run">파급효과 계산</button>
+<button id="clear">시나리오 비우기</button>
+<p id="sim-status" role="status">시나리오를 추가하세요.</p>
+<div hidden id="results">
+<div class="cards" id="cards"></div>
+<h3>생산유발액 상위 15개 산업</h3>
+<div id="bars"></div>
+<button id="download">전체 산업 CSV 다운로드</button>
+<div class="scroll">
+<table>
+<caption>산업별 유발액 — 백만원, 생산유발액 내림차순</caption>
+<thead><tr><th>코드</th><th>산업</th><th>생산</th><th>수입</th><th>부가가치</th></tr></thead>
+<tbody id="result-rows"></tbody>
+</table>
+</div>
+</div>
+</section>
 
-                <div class="io-select-card selected" data-sheet="기본부문" style="flex: 1; background: #e1effe; border: 2px solid #3182ce; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; box-sizing: border-box;">
-                    <div style="font-size: 15px; color: #1e40af; margin-bottom: 8px;">기본부문</div>
-                    <div class="card-main-text" style="font-size: 24px; font-weight: bold; color: #1e3a8a; margin-bottom: 8px;">380</div>
-                    <div style="font-size: 13px; color: #3b82f6;">개 산업 (12.3MB)</div>
-                </div>
-            </div>
+<section id="linkage">
+<h2>3. 산업 연쇄효과 분석 (핵심산업 찾기)</h2>
+<p>생산유발계수표(Leontief 역행렬)로 계산합니다. 모두 단위 없는 비율(무차원)입니다.<br>
+영향력계수 = 열합계 ÷ 열합계 평균 (후방연쇄, 다른 산업을 끌어올리는 힘) /
+감응도계수 = 행합계 ÷ 행합계 평균 (전방연쇄, 다른 산업 수요 증가에 반응하는 정도). 1보다 크면 평균 이상입니다.</p>
+<div class="row-tools">
+<label>산업 검색<input disabled id="linkage-search" placeholder="산업 이름 또는 코드"/></label>
+<label>유형 <select disabled id="linkage-type">
+<option value="all">전체</option>
+<option value="key">핵심산업 (영향력≥1, 감응도≥1)</option>
+<option value="back">후방연쇄 선도 (영향력≥1, 감응도&lt;1)</option>
+<option value="fwd">전방연쇄 선도 (영향력&lt;1, 감응도≥1)</option>
+<option value="low">낮은 연쇄 (둘 다 &lt;1)</option>
+</select></label>
+<label>정렬 <select disabled id="linkage-sort">
+<option value="backward">영향력계수 높은 순</option>
+<option value="forward">감응도계수 높은 순</option>
+<option value="code">코드 순</option>
+</select></label>
+<button disabled id="linkage-download">CSV 다운로드</button>
+</div>
+<div class="scroll">
+<table>
+<caption id="linkage-caption">자료를 불러온 후 표시됩니다.</caption>
+<thead><tr><th>코드</th><th>산업</th><th>영향력계수</th><th>감응도계수</th><th>유형</th></tr></thead>
+<tbody id="linkage-rows"></tbody>
+</table>
+</div>
+</section>
+</main>
 
-            <!-- 백엔드 호환용 숨김 셀렉트 박스 -->
-            <div style="display: none !important;">
-                <select id="sheet"></select>
-            </div>
-
-            <p>선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
-            <label>행 이름 검색<input disabled="" id="row-search" placeholder="예: 자동차, 부가가치"/></label>
-            <label>행 선택<select disabled="" id="row"></select></label>
-            <p id="unit"></p>
-            <label>열 검색<input disabled="" id="col-search" placeholder="열 이름 또는 코드"/></label>
-            <div class="scroll">
-                <table>
-                    <caption id="explore-caption">기본 자료를 불러온 후 표시됩니다.</caption>
-                    <thead>
-                        <tr><th>열 코드</th><th>열 이름</th><th>원자료 값</th></tr>
-                    </thead>
-                    <tbody id="cells"></tbody>
-                </table>
-            </div>
-            <p class="note">스크롤하여 전체 열을 볼 수 있습니다. 금액표의 일반 데이터 단위는 백만원입니다. 구성비·유발계수 등 요약 행은 행 명칭을 우선 확인하세요.</p>
-        </section>
-
-        <section id="simulation">
-            <h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2>
-            <p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p>
-            <label>산업 검색<input disabled="" id="sector-search" placeholder="산업 이름 또는 코드"/></label>
-            <form id="scenario">
-                <label>산업<select disabled="" id="sector" required=""></select></label>
-                <label>증가액 (백만원)<input disabled="" id="amount" min="0.01" required="" step="any" type="number" value="1000"/></label>
-                <p class="note">1,000백만원 = 10억원. 이번 버전은 양의 수요 증가만 지원합니다.</p>
-                <button disabled="" id="add">시나리오에 추가</button>
-            </form>
-            <ul id="basket"></ul>
-            <button disabled="" id="run">파급효과 계산</button>
-            <button id="clear">시나리오 비우기</button>
-            <p id="sim-status" role="status">시나리오를 추가하세요.</p>
-            <div hidden="" id="results">
-                <div class="cards" id="cards"></div>
-                <h3>생산유발액 상위 15개 산업</h3>
-                <div id="bars"></div>
-                <button id="download">전체 380개 산업 CSV 다운로드</button>
-                <div class="scroll">
-                    <table>
-                        <caption>산업별 유발액 — 백만원, 생산유발액 내림차순</caption>
-                        <thead>
-                            <tr><th>코드</th><th>산업</th><th>생산</th><th>수입</th><th>부가가치</th></tr>
-                        </thead>
-                        <tbody id="result-rows"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>브라우저 계산 · GitHub Pages 배포용</footer>
-
-    <!-- === 다이렉트 데이터 매핑 연동 스크립트 === -->
-    <script>
-    window.addEventListener('load', () => {
-        const cards = document.querySelectorAll('.io-select-card');
-        const sheetSelect = document.getElementById('sheet');
-        const loadBtn = document.getElementById('load-basic');
-
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                const targetSheet = card.getAttribute('data-sheet');
-
-                // 1. 카드 디자인 스타일 즉시 변경 (선택된 것만 파란색)
-                cards.forEach(c => {
-                    c.style.background = '#f0f4f8';
-                    c.style.border = '2px solid transparent';
-                    c.querySelector('div:first-child').style.color = '#334e68';
-                    c.querySelector('.card-main-text').style.color = '#102a43';
-                });
-                card.style.background = '#e1effe';
-                card.style.border = '2px solid #3182ce';
-                card.querySelector('div:first-child').style.color = '#1e40af';
-                card.querySelector('.card-main-text').style.color = '#1e3a8a';
-
-                // 2. 숨겨진 select 박스에 사용자가 누른 카드 이름을 포함하는 옵션이 있다면 강제 선택
-                if (sheetSelect) {
-                    let found = false;
-                    for (let opt of sheetSelect.options) {
-                        if (opt.text.includes(targetSheet) || opt.value.includes(targetSheet)) {
-                            sheetSelect.value = opt.value;
-                            found = true;
-                            break;
-                        }
-                    }
-                    // 만약 아직 옵션이 안 채워졌다면 강제로 임시 옵션을 만들어서라도 박아넣음
-                    if (!found) {
-                        sheetSelect.innerHTML = `<option value="${targetSheet}">${targetSheet}</option>`;
-                        sheetSelect.value = targetSheet;
-                    }
-                    sheetSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-
-                // 3. 데이터 로드 버튼 실행
-                if (loadBtn) {
-                    loadBtn.click();
-                }
-            });
-        });
-    });
-    </script>
+<footer>브라우저 계산 · GitHub Pages 배포용</footer>
 </body>
 </html>
