@@ -90,32 +90,3 @@ loadButton.onclick = async () => {
     loadButton.disabled = false;
   }
 };
-// === [추가] 새로운 분류 선택 버튼 이벤트 핸들러 ===
-document.addEventListener('DOMContentLoaded', () => {
-    const newLoadBtn = document.getElementById('new-load-btn');
-    if (newLoadBtn) {
-        newLoadBtn.addEventListener('click', async () => {
-            const selectedClass = document.getElementById('new-sheet-select').value;
-            const resultArea = document.getElementById('new-result-area');
-            
-            resultArea.innerText = "데이터를 불러오는 중입니다...";
-
-            try {
-                // Pyodide 환경에서 파이썬 함수 호출 (기존 worker나 pyodide 실행 방식에 맞게 연동)
-                // 만약 전역 pyodide 객체를 쓴다면 아래와 같이 호출할 수 있습니다.
-                if (typeof pyodide !== 'undefined') {
-                    // 파이썬 함수에 인자 전달 후 실행
-                    pyodide.globals.set("sel_class", selectedClass);
-                    let pyResult = await pyodide.runPythonAsync(`
-                        load_classification_table(sel_class)
-                    `);
-                    resultArea.innerText = pyResult;
-                } else {
-                    resultArea.innerText = "Pyodide 환경이 아직 준비되지 않았거나 연동 방식을 확인해주세요.";
-                }
-            } catch (error) {
-                resultArea.innerText = "실행 오류: " + error.message;
-            }
-        });
-    }
-});
