@@ -5,7 +5,7 @@ async function handle({id,type,payload}) {
   try {
     let result;
     if(type==='init') {
-      postMessage({type:'status',text:'Python 실행 환경 준비 중…'});
+      postMessage({type:'status',text:'조금만 기다려주세요…'});
       if(!py){
         importScripts(BASE+'pyodide.js');
         py=await loadPyodide({indexURL:BASE});
@@ -18,7 +18,7 @@ async function handle({id,type,payload}) {
         if(!r2.ok) throw Error('linkage.py를 불러올 수 없습니다.');
         await py.runPythonAsync(await r2.text());
       }
-      postMessage({type:'status',text:'Excel 읽기와 계수 검증 중…'});
+      postMessage({type:'status',text:'조금만 기다려주세요…'});
       py.globals.set('raw_input',new Uint8Array(payload));
       await py.runPythonAsync('raw_bytes = raw_input.to_py()');
       result=await py.runPythonAsync('initialize(raw_bytes)');
