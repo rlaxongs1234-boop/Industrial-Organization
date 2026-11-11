@@ -32,26 +32,61 @@ function renderResult(){$('results').hidden=false;$('cards').replaceChildren(...
 function csvCell(v){let s=String(v);if(/^[=+@-]/.test(s)&&typeof v!=='number')s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
 $('download').onclick=()=>{if(!result)return;const rows=[['산업코드','산업명','생산유발액_백만원','수입유발액_백만원','부가가치유발액_백만원'],...result.rows.map(r=>[r.code,r.name,r.production,r.imports,r.valueAdded])];const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='io-2023-results.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 
-async function loadDefaultWorkbook(){
- try {
-  $('status').textContent='기본 Excel 내려받는 중…';
-  const response=await fetch('./data/io-2023.xlsx');
-  if(!response.ok)throw Error('기본 Excel 다운로드 실패 (HTTP '+response.status+')');
+
+const workbookOptions = [
+  { label: '기본부문', file: 'io-2023.xlsx' },
+  { label: '대분류', file: '(표)(2023연장)투입산출표_생산자가격_통합대분류.xlsx' },
+  { label: '중분류', file: '(표)(2023연장)투입산출표_생산자가격_통합중분류.xlsx' },
+  { label: '소분류', file: '(표)(2023연장)투입산출표_생산자가격_통합소분류.xlsx' }
+];
+
+const classificationSelect = document.createElement('select');
+classificationSelect.id = 'classification-select';
+classificationSelect.setAttribute('aria-label', '산업연관표 분류 선택');
+
+workbookOptions.forEach(item => {
+  const option = document.createElement('option');
+  option.value = item.file;
+  option.textContent = item.label;
+  classificationSelect.append(option);
+});
+
+const loadButton = $('load-basic');
+loadButton.parentNode.insertBefore(classificationSelect, loadButton);
+
+async function loadSelectedWorkbook() {
+  const filename = classificationSelect.value;
+  const selected = workbookOptions.find(item => item.file === filename);
+
+  $('status').textContent = selected.label + ' 엑셀 파일 불러오는 중…';
+
+  const response = await fetch('./data/' + encodeURIComponent(filename));
+
+  if (!response.ok) {
+    throw Error(selected.label + ' 파일을 불러오지 못했습니다. HTTP ' + response.status);
+  }
+
   await load(await response.arrayBuffer());
- }catch(error){
-  $('status').textContent='준비 실패: '+error.message+' — 연결 상태를 확인하고 새로고침하세요.';
- }
 }
-$('load-basic').onclick=async()=>{
- const button=$('load-basic');
- button.disabled=true;
- button.textContent='불러오는 중…';
- try {
-  await loadDefaultWorkbook();
-  const ready=!$('sheet').disabled;
-  button.textContent=ready?'기본부문 불러오기 완료':'기본부문 다시 불러오기';
-  button.disabled=ready;
- }finally{
-  if($('sheet').disabled){button.disabled=false;button.textContent='기본부문 다시 불러오기';}
- }
+
+loadButton.onclick = async () => {
+  loadButton.disabled = true;
+  loadButton.textContent = '불러오는 중…';
+
+  try {
+    await loadSelectedWorkbook();
+
+    const ready = !$('sheet').disabled;
+
+    loadButton.textContent = ready
+      ? classificationSelect.options[classificationSelect.selectedIndex].text + ' 불러오기 완료'
+      : '다시 불러오기';
+
+  } catch (error) {
+    $('status').textContent = '불러오기 실패: ' + error.message;
+    loadButton.textContent = '다시 불러오기';
+
+  } finally {
+    loadButton.disabled = false;
+  }
 };
