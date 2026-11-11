@@ -1,4 +1,86 @@
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,sans-serif;background:#f1f5f9;color:#172d42;line-height:1.7}header{background:#123b50;color:white;padding:36px max(24px,calc((100vw - 1080px)/2))}header h1{font-size:clamp(1.7rem,4vw,2.6rem);margin:6px 0}nav{display:flex;gap:24px;flex-wrap:wrap;padding:14px 24px;background:#fff;border-bottom:1px solid #cbd5e1}a{color:#0d5c73}main{max-width:1120px;margin:auto;padding:24px}section{background:white;border:1px solid #dce5eb;border-radius:12px;margin-bottom:24px;padding:26px;scroll-margin-top:20px}h2{margin-top:0}label{display:block;margin:15px 0;font-weight:600}input,select{display:block;width:100%;padding:11px;border:1px solid #64748b;border-radius:6px;font:inherit;margin-top:5px}button{font:inherit;cursor:pointer;padding:10px 17px;background:#145c70;color:white;border:0;border-radius:6px;margin:5px 8px 5px 0}button:disabled{opacity:.5;cursor:wait}:focus-visible{outline:3px solid #b65c00;outline-offset:3px}.note{color:#526478;font-size:.92rem}#status{background:#eaf5f5;padding:14px;border-radius:8px}.scroll{overflow:auto;max-height:460px}table{width:100%;border-collapse:collapse;font-size:.94rem}th,td{padding:10px;border-bottom:1px solid #dce5eb;text-align:left}thead{position:sticky;top:0;background:#eaf0f4}td:last-child{font-variant-numeric:tabular-nums}caption{text-align:left;padding:12px 0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card{padding:16px;background:#edf6f7;border-radius:8px}.card strong{display:block;font-size:1.5rem}.bar{margin:12px 0}.track{background:#edf2f7;border-radius:4px;height:12px}.fill{height:12px;background:#168179;border-radius:4px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f5f9;padding:15px}footer{text-align:center;padding:24px}#basket button{font-size:.85rem} @media(max-width:600px){main{padding:12px}section{padding:18px}nav{gap:14px}}
-.loading-status{background:#fff;border:1px solid #dce5eb;border-radius:10px;padding:12px 20px;margin-bottom:24px}.loading-status #status{margin:0;background:transparent;padding:6px 0}.loading-status details{font-size:.9rem;color:#526478}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f5f6f8;
+    margin: 0;
+    padding: 20px;
+}
 
-.section-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}.section-heading h2{margin:0}.section-heading button{margin:0;white-space:nowrap}
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.card-grid {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.io-card {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #e1e4e8;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.io-card:hover {
+    border-color: #3182ce;
+    transform: translateY(-2px);
+}
+
+/* 🔵 선택되었을 때 파란색 테마 설정 */
+.io-card.active {
+    background: #ebf8ff;
+    border: 2px solid #3182ce;
+}
+
+.card-num {
+    font-size: 26px;
+    font-weight: bold;
+    color: #212529;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-top: 4px;
+}
+
+.card-size {
+    font-size: 12px;
+    color: #868e96;
+    margin-top: 6px;
+}
+
+/* 🔵 선택된 카드의 글자색도 파란색으로 변경 */
+.io-card.active .card-num,
+.io-card.active .card-title {
+    color: #2b6cb0;
+}
+
+.status-box {
+    margin-top: 15px;
+    padding: 12px;
+    background: #f1f3f5;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.result-box {
+    margin-top: 10px;
+    padding: 15px;
+    background: #fafafa;
+    border: 1px solid #eeeeee;
+    border-radius: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: monospace;
+}
