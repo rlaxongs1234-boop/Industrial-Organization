@@ -6,13 +6,18 @@ async function handle({id,type,payload}) {
     let result;
     if(type==='init') {
       postMessage({type:'status',text:'Python 실행 환경 준비 중…'});
-      importScripts(BASE+'pyodide.js');
-      py=await loadPyodide({indexURL:BASE});
-      await py.loadPackage(['numpy','micropip']);
-      await py.runPythonAsync("import micropip\nawait micropip.install('openpyxl==3.1.5')");
-      const response=await fetch('./model.py');
-      if(!response.ok) throw Error('model.py를 불러올 수 없습니다.');
-      await py.runPythonAsync(await response.text());
+      if(!py){
+        importScripts(BASE+'pyodide.js');
+        py=await loadPyodide({indexURL:BASE});
+        await py.loadPackage(['numpy','micropip']);
+        await py.runPythonAsync("import micropip\nawait micropip.install('openpyxl==3.1.5')");
+        const response=await fetch('./model.py');
+        if(!response.ok) throw Error('model.py를 불러올 수 없습니다.');
+        await py.runPythonAsync(await response.text());
+        const r2=await fetch('./linkage.py');
+        if(!r2.ok) throw Error('linkage.py를 불러올 수 없습니다.');
+        await py.runPythonAsync(await r2.text());
+      }
       postMessage({type:'status',text:'Excel 읽기와 계수 검증 중…'});
       py.globals.set('raw_input',new Uint8Array(payload));
       await py.runPythonAsync('raw_bytes = raw_input.to_py()');
@@ -22,6 +27,8 @@ async function handle({id,type,payload}) {
       py.globals.set('sheet_input',payload.sheet);
       py.globals.set('row_input',payload.row||'');
       result=py.runPython('explore(sheet_input, row_input)');
+    } else if(type==='linkage') {
+      result=py.runPython('linkage()');
     } else {
       py.globals.set('scenario_input',JSON.stringify(payload));
       result=py.runPython('simulate(scenario_input)');
