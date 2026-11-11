@@ -17,22 +17,21 @@
 .io-select-card.selected .s{color:#3b82f6}
 .io-select-card:disabled{opacity:.6;cursor:wait}
 .row-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.tabbar{display:flex;gap:8px;margin:12px 0 20px;flex-wrap:wrap}
+.tab-btn{padding:12px 22px;border:2px solid #cbd5e0;border-radius:10px;background:#fff;font:inherit;font-size:16px;cursor:pointer;color:#334e68}
+.tab-btn:hover{border-color:#90cdf4}
+.tab-btn.active{background:#3182ce;border-color:#3182ce;color:#fff;font-weight:bold}
+[hidden]{display:none!important}
 .tag-key{font-weight:bold;color:#1e40af}
 </style>
-<script defer src="./app.js"></script>
+<script defer src="./app.js?v=4"></script>
 </head>
 <body>
 <header>
 <p>2023 · 생산자가격 · 대분류·중분류·소분류·기본부문</p>
 <h1>과제물1: 산업연관표분석 웹앱</h1>
-<p>원자료 시트 탐색 · 수요충격 파급효과 · 연쇄효과(핵심산업) 분석</p>
+<p>파일을 선택한 뒤 원자료 탐색 · 시뮬레이션 · 연쇄효과 분석 중 하나를 고르세요</p>
 </header>
-
-<nav aria-label="주요 메뉴">
-<a href="#explorer">원자료 탐색</a>
-<a href="#simulation">시뮬레이터</a>
-<a href="#linkage">연쇄효과</a>
-</nav>
 
 <main>
 <aside aria-label="분석 준비 상태" class="loading-status">
@@ -43,16 +42,26 @@
 </details>
 </aside>
 
-<section id="explorer">
-<div class="section-heading"><h2>1. 원자료 탐색</h2></div>
-
+<section id="file-select">
+<h2>1. 분석할 파일 선택</h2>
 <div class="io-cards" role="group" aria-label="분류 선택">
 <button type="button" class="io-select-card" data-label="대분류"><div class="t">대분류</div><div class="n">33</div><div class="s">개 산업 (0.6MB)</div></button>
 <button type="button" class="io-select-card" data-label="중분류"><div class="t">중분류</div><div class="n">83</div><div class="s">개 산업 (1.2MB)</div></button>
 <button type="button" class="io-select-card" data-label="소분류"><div class="t">소분류</div><div class="n">165</div><div class="s">개 산업 (3.1MB)</div></button>
 <button type="button" class="io-select-card" data-label="기본부문"><div class="t">기본부문</div><div class="n">380</div><div class="s">개 산업 (12.3MB)</div></button>
 </div>
+</section>
 
+<div hidden id="analysis">
+<h2>2. 분석 메뉴 선택</h2>
+<div class="tabbar" role="tablist">
+<button type="button" class="tab-btn" role="tab" data-tab="explorer">원자료 탐색</button>
+<button type="button" class="tab-btn" role="tab" data-tab="simulation">시뮬레이션</button>
+<button type="button" class="tab-btn" role="tab" data-tab="linkage">연쇄효과 분석</button>
+</div>
+
+<section id="explorer">
+<h2>원자료 탐색</h2>
 <p>선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
 <div class="row-tools">
 <label>시트 선택 <select disabled id="sheet"></select></label>
@@ -72,7 +81,7 @@
 </section>
 
 <section id="simulation">
-<h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2>
+<h2>국내 생산물 최종수요 증가 시뮬레이션</h2>
 <p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p>
 <label>산업 검색<input disabled id="sector-search" placeholder="산업 이름 또는 코드"/></label>
 <form id="scenario">
@@ -101,7 +110,7 @@
 </section>
 
 <section id="linkage">
-<h2>3. 산업 연쇄효과 분석 (핵심산업 찾기)</h2>
+<h2>산업 연쇄효과 분석 (핵심산업 찾기)</h2>
 <p>생산유발계수표(Leontief 역행렬)로 계산합니다. 모두 단위 없는 비율(무차원)입니다.<br>
 영향력계수 = 열합계 ÷ 열합계 평균 (후방연쇄, 다른 산업을 끌어올리는 힘) /
 감응도계수 = 행합계 ÷ 행합계 평균 (전방연쇄, 다른 산업 수요 증가에 반응하는 정도). 1보다 크면 평균 이상입니다.</p>
@@ -129,8 +138,10 @@
 </table>
 </div>
 </section>
+</div>
 </main>
 
 <footer>브라우저 계산 · GitHub Pages 배포용</footer>
 </body>
 </html>
+
