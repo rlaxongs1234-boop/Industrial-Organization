@@ -286,30 +286,3 @@ def simulate(payload):
         'multiplier': float(production.sum() / demand.sum()),
         'rows': result
     })
-# === [추가] 새로운 분류 체계별 시트 로드 및 분석 함수 ===
-import pandas as pd
-
-def load_classification_table(classification_name, file_path="data/io-2023.xlsx"):
-    # 대, 중, 소, 기본부문에 해당하는 실제 엑셀 시트 이름 매핑
-    sheet_map = {
-        "대분류": "대분류",    # 실제 엑셀의 시트명으로 변경 가능
-        "중분류": "중분류",
-        "소분류": "소분류",
-        "기본부문": "기본부문"
-    }
-    
-    target_sheet = sheet_map.get(classification_name, "대분류")
-    
-    try:
-        # 엑셀 시트 읽기
-        df = pd.read_excel(file_path, sheet_name=target_sheet)
-        
-        # 간단한 요약 정보 반환 (예: 상위 5행 데이터와 컬럼 정보)
-        summary_info = f"[{classification_name}] 시트 로드 성공!\n"
-        summary_info += f"전체 행/열 크기: {df.shape}\n"
-        summary_info += f"컬럼 목록: {list(df.columns[:5])} 외 {max(0, len(df.columns)-5)}개\n\n"
-        summary_info += str(df.head(5))
-        
-        return summary_info
-    except Exception as e:
-        return f"[{classification_name}] 시트를 불러오는 중 오류 발생: {str(e)}"
