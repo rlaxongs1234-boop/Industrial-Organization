@@ -19,7 +19,8 @@ async function load(buffer){
  for(const id of LOCKED)$(id).disabled=false;
  await explore();
  const lk=await call('linkage');linkRows=lk.rows;renderLinkage();
- $('status').textContent='준비 완료 · '+info.classification+' · '+sectors.length+'개 부문 · '+info.sheets.length+'개 시트 · 계수 검증 통과';$('analysis').hidden=false;
+ $('status').textContent='준비 완료 · '+info.classification+' · '+sectors.length+'개 부문 · '+info.sheets.length+'개 시트 · 계수 검증 통과';
+ $('analysis').hidden=false;
 }
 let exploreSeq=0;
 async function explore(){const seq=++exploreSeq;try{const d=await call('explore',{sheet:$('sheet').value,row:$('row').value});if(seq!==exploreSeq)return;rowChoices=d.rows;filterRows(d.selected);cells=d.cells;$('unit').textContent='단위: '+d.unit;$('explore-caption').textContent=$('sheet').value+' / 행: '+d.selected+' '+d.name;renderCells();}catch(e){$('status').textContent=e.message;}}
@@ -64,7 +65,7 @@ const cards=[...document.querySelectorAll('.io-select-card')];
 async function loadClass(label,card){
  if(loading)return;loading=true;cards.forEach(c=>c.disabled=true);
  try{
-  $('status').textContent=label+'조금만 기다려주세요…'';
+  $('status').textContent='조금만 기다려주세요…';
   const res=await fetch('./data/'+encodeURIComponent(FILES[label]));
   if(!res.ok)throw Error(label+' 파일을 불러오지 못했습니다. HTTP '+res.status);
   await load(await res.arrayBuffer());
@@ -83,14 +84,3 @@ function showTab(name){
 }
 tabs.forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
 showTab('explorer');
-
-// ---- 분석 메뉴 선택 (원자료 탐색 / 시뮬레이션 / 연쇄효과 분석) ----
-const tabs=[...document.querySelectorAll('.tab-btn')];
-const panels={explorer:$('explorer'),simulation:$('simulation'),linkage:$('linkage')};
-function showTab(name){
- tabs.forEach(t=>{const on=t.dataset.tab===name;t.classList.toggle('active',on);t.setAttribute('aria-selected',on);});
- for(const k in panels)panels[k].hidden=(k!==name);
-}
-tabs.forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
-showTab('explorer');
-
