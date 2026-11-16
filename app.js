@@ -18,7 +18,7 @@ async function load(buffer){
  $('validation').textContent=JSON.stringify(info.residuals,null,2)+'\n최대 절대 잔차: 허용값 1e-8 미만';
  for(const id of LOCKED)$(id).disabled=false;
  await explore();
- const lk=await call('linkage');linkRows=lk.rows;renderLinkage();
+ const lk=await call('linkage');linkRows=lk.rows;renderLinkage();renderLinkageSummary();
  $('status').textContent='준비 완료 · '+info.classification+' · '+sectors.length+'개 부문 · '+info.sheets.length+'개 시트 · 계수 검증 통과';
  $('analysis').hidden=false;
 }
@@ -164,6 +164,19 @@ function filteredLinkage(){const q=$('linkage-search').value.trim(),t=$('linkage
 function renderLinkage(){const list=filteredLinkage();
  $('linkage-caption').textContent='연쇄효과 계수 — '+list.length+'/'+linkRows.length+'개 산업 (무차원 비율)';
  $('linkage-rows').replaceChildren(...list.map(r=>{const tr=document.createElement('tr');[r.code,r.name,r.backward.toFixed(3),r.forward.toFixed(3),TYPE_LABEL[r.type]].forEach((v,i)=>{const td=text('td',v);if(r.type==='key'&&i===4)td.className='tag-key';tr.append(td);});return tr;}));}
+
+function renderLinkageSummary(){
+ const key=linkRows.filter(r=>r.type==='key').sort((x,y)=>y.backward-x.backward);
+ const topB=[...linkRows].sort((x,y)=>y.backward-x.backward)[0],topF=[...linkRows].sort((x,y)=>y.forward-x.forward)[0];
+ const card=(cls,big,label,small)=>{const d=document.createElement('div');d.className='card'+(cls?' '+cls:'');d.append(text('strong',big),text('span',label),text('small',small));return d;};
+ $('linkage-cards').replaceChildren(
+  card('key',key.length+'개','핵심산업 (전체 '+linkRows.length+'개 중)',key.slice(0,8).map(r=>r.name).join(' · ')+(key.length>8?' 외 '+(key.length-8)+'개':'')),
+  card('',topB.backward.toFixed(3),'영향력계수 1위',topB.name),
+  card('',topF.forward.toFixed(3),'감응도계수 1위',topF.name));
+ const bars=(id,f)=>{const top=[...linkRows].sort((x,y)=>y[f]-x[f]).slice(0,10),max=Math.max(...top.map(r=>r[f]),1e-9);
+  $(id).replaceChildren(...top.map(r=>{const d=text('div',r.name+' · '+r[f].toFixed(3));d.className='bar';const t=document.createElement('div');t.className='track';const fl=document.createElement('div');fl.className='fill'+(r.type==='key'?' k':'');fl.style.width=(r[f]/max*100)+'%';t.append(fl);d.append(t);return d;}));};
+ bars('linkage-bars-back','backward');bars('linkage-bars-fwd','forward');
+}
 for(const id of ['linkage-search','linkage-type','linkage-sort'])$(id).oninput=renderLinkage;
 $('linkage-download').onclick=()=>{saveCsv([['산업코드','산업명','영향력계수','감응도계수','유형'],...filteredLinkage().map(r=>[r.code,r.name,r.backward,r.forward,TYPE_LABEL[r.type]])],'io-linkage.csv');};
 
