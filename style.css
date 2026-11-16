@@ -2,3 +2,19 @@
 .loading-status{background:#fff;border:1px solid #dce5eb;border-radius:10px;padding:12px 20px;margin-bottom:24px}.loading-status #status{margin:0;background:transparent;padding:6px 0}.loading-status details{font-size:.9rem;color:#526478}
 
 .section-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}.section-heading h2{margin:0}.section-heading button{margin:0;white-space:nowrap}
+
+/* 계산식 카드: 기존 카드 디자인 유지 */
+.formula-card {
+  color: #172d42 !important;
+  background: #edf6f7 !important;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.formula-card strong,
+.formula-card span {
+  color: #172d42 !important;
+}
