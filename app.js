@@ -34,12 +34,124 @@ function renderBasket(){$('basket').replaceChildren(...basket.map((s,i)=>{const 
 $('scenario').onsubmit=e=>{e.preventDefault();const amount=Number($('amount').value),s=sectors.find(s=>s.code===$('sector').value);if(!s||!Number.isFinite(amount)||amount<=0){$('sim-status').textContent='산업과 양의 증가액을 확인하세요.';return;}basket.push({...s,amount});invalidate();renderBasket();};
 $('clear').onclick=()=>{basket=[];invalidate();renderBasket();};
 $('run').onclick=async()=>{if(!basket.length){$('sim-status').textContent='시나리오를 먼저 추가하세요.';return;}const snapshot=basket.map(s=>({...s}));$('run').disabled=true;$('sim-status').textContent='계산 중…';try{const r=await call('simulate',snapshot);if(JSON.stringify(snapshot)!==JSON.stringify(basket)){$('sim-status').textContent='입력이 변경되었습니다. 다시 계산하세요.';return;}result=r;renderResult();$('sim-status').textContent='계산 완료. 아래 결과는 현재 시나리오에 대응합니다.';}catch(e){invalidate();$('sim-status').textContent='계산 실패: '+e.message;}finally{$('run').disabled=false;}};
-function renderResult(){$('results').hidden=false;
- const items=[['수요 증가액',result.demand,'백만원'],['생산유발액',result.production,'백만원'],['수입유발액',result.imports,'백만원'],['부가가치유발액',result.valueAdded,'백만원'],['생산유발승수',result.multiplier,'배 (생산유발액÷수요증가액)'],['부가가치유발률',result.valueAdded/result.demand*100,'% (부가가치유발액÷수요증가액)']];
- $('cards').replaceChildren(...items.map(([title,v,u])=>{const d=text('div',title);d.className='card';d.append(text('strong',fmt(v)),text('span',u));return d;}));
- const max=Math.max(...result.rows.map(r=>r.production),1);
- $('bars').replaceChildren(...result.rows.slice(0,15).map(r=>{const d=text('div',r.name+' · '+fmt(r.production)+'백만원');d.className='bar';const t=document.createElement('div');t.className='track';const f=document.createElement('div');f.className='fill';f.style.width=Math.max(0,r.production/max*100)+'%';t.append(f);d.append(t);return d;}));
- $('result-rows').replaceChildren(...result.rows.map(r=>{const tr=document.createElement('tr');[r.code,r.name,fmt(r.production),fmt(r.imports),fmt(r.valueAdded)].forEach(v=>tr.append(text('td',v)));return tr;}));}
+
+function renderResult(){
+  $('results').hidden=false;
+
+  const formulaInfo = {
+    production: {
+      title: '생산유발효과 계산 과정',
+      description: '최종수요가 증가했을 때 국내 산업 전체에서 직·간접적으로 발생하는 생산 증가액입니다.',
+      equation: 'X = L × Y',
+      symbols: [
+        'X: 산업별 생산유발액',
+        'L: 생산유발계수 행렬',
+        'Y: 최종수요 증가액 벡터'
+      ],
+      steps: [
+        '입력한 산업별 최종수요 증가액을 벡터 Y로 구성합니다.',
+        '생산유발계수 행렬 L을 준비합니다.',
+        'L과 Y를 행렬 곱셈합니다.',
+        '산업별 생산유발액을 계산하고 전체 합계를 구합니다.'
+      ]
+    },
+    imports: {
+      title: '수입유발효과 계산 과정',
+      description: '최종수요 증가에 따라 국내 산업에서 직·간접적으로 유발되는 수입액입니다.',
+      equation: 'M = M̂ × Y',
+      symbols: [
+        'M: 산업별 수입유발액',
+        'M̂: 수입유발계수 행렬',
+        'Y: 최종수요 증가액 벡터'
+      ],
+      steps: [
+        '입력한 최종수요 증가액을 벡터 Y로 구성합니다.',
+        '수입유발계수 행렬을 준비합니다.',
+        '수입유발계수 행렬과 Y를 곱합니다.',
+        '산업별 수입유발액을 계산하고 전체 합계를 구합니다.'
+      ]
+    },
+    valueAdded: {
+      title: '부가가치유발효과 계산 과정',
+      description: '최종수요 증가에 따라 국내 산업에서 새롭게 창출되는 부가가치입니다.',
+      equation: 'V = V̂ × Y',
+      symbols: [
+        'V: 산업별 부가가치유발액',
+        'V̂: 부가가치유발계수 행렬',
+        'Y: 최종수요 증가액 벡터'
+      ],
+      steps: [
+        '입력한 최종수요 증가액을 벡터 Y로 구성합니다.',
+        '부가가치유발계수 행렬을 준비합니다.',
+        '부가가치유발계수 행렬과 Y를 곱합니다.',
+        '산업별 부가가치유발액을 계산하고 전체 합계를 구합니다.'
+      ]
+    }
+  };
+
+  const items = [
+    ['수요 증가액',result.demand,'백만원',null],
+    ['생산유발액',result.production,'백만원','production'],
+    ['수입유발액',result.imports,'백만원','imports'],
+    ['부가가치유발액',result.valueAdded,'백만원','valueAdded'],
+    ['생산유발승수',result.multiplier,'배 (생산유발액÷수요증가액)',null],
+    ['부가가치유발률',result.valueAdded/result.demand*100,'% (부가가치유발액÷수요증가액)',null]
+  ];
+
+  $('cards').replaceChildren(...items.map(([title,v,u,key])=>{
+    const d=text(key?'button':'div',title);
+    d.className='card'+(key?' formula-card':'');
+    if(key){
+      d.type='button';
+      d.onclick=()=>{
+        const info=formulaInfo[key];
+        $('formula-title').textContent=info.title;
+        $('formula-description').textContent=info.description;
+        $('formula-equation').textContent=info.equation;
+        $('formula-symbols').replaceChildren(
+          ...info.symbols.map(s=>text('li',s))
+        );
+        $('formula-steps').replaceChildren(
+          ...info.steps.map(s=>text('li',s))
+        );
+        $('formula-detail').hidden=false;
+        $('formula-detail').scrollIntoView({
+          behavior:'smooth',
+          block:'nearest'
+        });
+      };
+    }
+    d.append(text('strong',fmt(v)),text('span',u));
+    if(key)d.append(text('small','계산식 보기 ＋'));
+    return d;
+  }));
+
+  const max=Math.max(...result.rows.map(r=>r.production),1);
+  $('bars').replaceChildren(...result.rows.slice(0,15).map(r=>{
+    const d=text('div',r.name+' · '+fmt(r.production)+'백만원');
+    d.className='bar';
+    const t=document.createElement('div');
+    t.className='track';
+    const f=document.createElement('div');
+    f.className='fill';
+    f.style.width=Math.max(0,r.production/max*100)+'%';
+    t.append(f);
+    d.append(t);
+    return d;
+  }));
+
+  $('result-rows').replaceChildren(...result.rows.map(r=>{
+    const tr=document.createElement('tr');
+    [r.code,r.name,fmt(r.production),fmt(r.imports),fmt(r.valueAdded)]
+      .forEach(v=>tr.append(text('td',v)));
+    return tr;
+  }));
+}
+
+$('formula-close').onclick=()=>{
+  $('formula-detail').hidden=true;
+};
+
 function csvCell(v){let s=String(v);if(/^[=+@-]/.test(s)&&typeof v!=='number')s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
 function saveCsv(rows,name){const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(csvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('download').onclick=()=>{if(!result)return;saveCsv([['산업코드','산업명','생산유발액_백만원','수입유발액_백만원','부가가치유발액_백만원'],...result.rows.map(r=>[r.code,r.name,r.production,r.imports,r.valueAdded])],'io-results.csv');};
