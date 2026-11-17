@@ -23,7 +23,7 @@ async function load(buffer){
  $('analysis').hidden=false;
 }
 let exploreSeq=0;
-async function explore(){const seq=++exploreSeq;try{const d=await call('explore',{sheet:$('sheet').value,row:$('row').value});if(seq!==exploreSeq)return;rowChoices=d.rows;filterRows(d.selected);cells=d.cells;$('unit').textContent='단위: '+d.unit;$('explore-caption').textContent=$('sheet').value+' / 행: '+d.selected+' '+d.name;renderCells();}catch(e){$('status').textContent=e.message;}}
+async function explore(){const seq=++exploreSeq;try{const d=await call('explore',{sheet:$('sheet').value,row:$('row').value});if(seq!==exploreSeq)return;rowChoices=d.rows;filterRows(d.selected);cells=d.cells;$('unit').textContent=String(d.unit).startsWith('단위')?d.unit:'단위: '+d.unit;$('explore-caption').textContent=$('sheet').value+' / 행: '+d.selected+' '+d.name;renderCells();}catch(e){$('status').textContent=e.message;}}
 function filterRows(selected){const q=$('row-search').value.trim();options($('row'),rowChoices.filter(r=>(r.code+' '+r.name).includes(q)));if([...$('row').options].some(o=>o.value===selected))$('row').value=selected;}
 function renderCells(){const q=$('col-search').value.trim();$('cells').replaceChildren(...cells.filter(c=>(c.code+' '+c.name).includes(q)).map(c=>{const tr=document.createElement('tr');for(const v of [c.code,c.name,c.value===null?'빈 셀':typeof c.value==='number'?fmt(c.value):c.value])tr.append(text('td',v));return tr;}));}
 $('sheet').onchange=()=>{$('row-search').value='';$('row').replaceChildren();explore();};$('row').onchange=explore;
@@ -163,7 +163,7 @@ function filteredLinkage(){const q=$('linkage-search').value.trim(),t=$('linkage
  if(s==='code')list.sort((a,b)=>a.code.localeCompare(b.code,'ko',{numeric:true}));else list.sort((a,b)=>b[s]-a[s]);return list;}
 function renderLinkage(){const list=filteredLinkage();
  $('linkage-caption').textContent='연쇄효과 계수 — '+list.length+'/'+linkRows.length+'개 산업 (무차원 비율)';
- $('linkage-rows').replaceChildren(...list.map(r=>{const tr=document.createElement('tr');[r.code,r.name,r.backward.toFixed(3),r.forward.toFixed(3),TYPE_LABEL[r.type]].forEach((v,i)=>{const td=text('td',v);if(r.type==='key'&&i===4)td.className='tag-key';tr.append(td);});return tr;}));}
+ $('linkage-rows').replaceChildren(...list.map(r=>{const tr=document.createElement('tr');[r.code,r.name,r.backward.toFixed(3),r.forward.toFixed(3),TYPE_LABEL[r.type]].forEach((v,i)=>{let td;if(i===4){td=document.createElement('td');const s=text('span',v);s.className='chip c-'+r.type;td.append(s);}else td=text('td',v);if(r.type==='key'&&i===4)td.className='tag-key';tr.append(td);});return tr;}));}
 
 function renderLinkageSummary(){
  const key=linkRows.filter(r=>r.type==='key').sort((x,y)=>y.backward-x.backward);
