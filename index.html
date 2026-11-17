@@ -4,74 +4,32 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>산업연관표분석</title>
-<link href="./style.css" rel="stylesheet"/>
-<style>
-.io-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin:20px 0}
-.io-select-card{background:#f0f4f8;border:2px solid transparent;border-radius:12px;padding:20px;cursor:pointer;text-align:left;font:inherit;color:#334e68;transition:all .2s}
-.io-select-card:hover{border-color:#90cdf4}
-.io-select-card .t{font-size:15px;margin-bottom:8px}
-.io-select-card .n{font-size:24px;font-weight:bold;color:#102a43;margin-bottom:8px}
-.io-select-card .s{font-size:13px;color:#627d98}
-.io-select-card.selected{background:#e1effe;border-color:#3182ce;color:#1e40af}
-.io-select-card.selected .n{color:#1e3a8a}
-.io-select-card.selected .s{color:#3b82f6}
-.io-select-card:disabled{opacity:.6;cursor:wait}
-.row-tools{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
-.tabbar{display:flex;gap:8px;margin:12px 0 20px;flex-wrap:wrap}
-.tab-btn{padding:12px 22px;border:2px solid #cbd5e0;border-radius:10px;background:#fff;font:inherit;font-size:16px;cursor:pointer;color:#334e68}
-.tab-btn:hover{border-color:#90cdf4}
-.tab-btn.active{background:#3182ce;border-color:#3182ce;color:#fff;font-weight:bold}
-[hidden]{display:none!important}
-.tag-key{font-weight:bold;color:#1e40af}
-.link-cards{margin:18px 0}
-.link-cards .card small{display:block;color:#526478;margin-top:4px;line-height:1.5}
-.link-cards .card.key{background:#fdf1e7}
-.link-cards .card.key strong{color:#c2410c}
-.link-two{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:8px 0 6px}
-.link-two h3{margin:10px 0 4px}
-.link-two .fill.k{background:#c2410c}
-.link-legend{font-size:.88rem;color:#526478}
-.link-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin:0 5px 0 12px;vertical-align:-1px}
-.link-legend i:first-child{margin-left:0}
-@media(max-width:800px){.link-two{grid-template-columns:1fr}}
-</style>
-<script defer src="./app.js?v=5"></script>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet"/>
+<link href="./style.css?v=7" rel="stylesheet"/>
+<script defer src="./app.js?v=8"></script>
+<script defer src="./hero.js?v=2"></script>
 </head>
 <body>
-<header>
-<p>2023 · 생산자가격 · 대분류·중분류·소분류·기본부문</p>
-<h1>산업연관표분석</h1>
-<p>파일을 선택한 뒤 원자료 탐색 · 시뮬레이션 · 연쇄효과 분석 중 하나를 고르세요</p>
-</header>
+<div class="app">
 
-<main>
-<aside aria-label="분석 준비 상태" class="loading-status">
-<p id="status" role="status">아래 카드를 클릭하면 해당 분류 데이터가 로드됩니다.</p>
-<details>
-<summary>계수 검증 결과</summary>
-<pre id="validation">아직 자료를 불러오지 않았습니다.</pre>
-</details>
+<aside class="side" aria-label="메뉴">
+<div class="brand"><span class="brand-mark" aria-hidden="true"></span><span class="brand-name">산업연관표 분석</span></div>
+<nav class="nav" role="tablist" aria-label="분석 메뉴">
+<button type="button" class="tab-btn" role="tab" data-tab="explorer"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 10v10"/></svg><span>원자료 탐색</span></button>
+<button type="button" class="tab-btn" role="tab" data-tab="simulation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>시뮬레이션</span></button>
+<button type="button" class="tab-btn" role="tab" data-tab="linkage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8.3 8.6l2.6 7.2M15.9 8.3l-2.5 7.4M8.5 7l7 -.8"/></svg><span>연쇄효과 분석</span></button>
+</nav>
+<p class="side-foot">2023년 생산자가격 기준<br>모든 계산은 브라우저에서 실행됩니다.</p>
 </aside>
 
-<section id="file-select">
-<h2>1. 분석할 파일 선택</h2>
-<div class="io-cards" role="group" aria-label="분류 선택">
-<button type="button" class="io-select-card" data-label="대분류"><div class="t">대분류</div><div class="n">33</div><div class="s">개 산업 (0.6MB)</div></button>
-<button type="button" class="io-select-card" data-label="중분류"><div class="t">중분류</div><div class="n">83</div><div class="s">개 산업 (1.2MB)</div></button>
-<button type="button" class="io-select-card" data-label="소분류"><div class="t">소분류</div><div class="n">165</div><div class="s">개 산업 (3.1MB)</div></button>
-<button type="button" class="io-select-card" data-label="기본부문"><div class="t">기본부문</div><div class="n">380</div><div class="s">개 산업 (12.3MB)</div></button>
-</div>
-</section>
+<main class="main">
+<header class="topbar">
+<h1>산업연관표 분석</h1>
+<p class="lead">수요 증가의 파급효과를 계산하고 경제의 핵심산업을 찾아봅니다.</p>
+</header>
 
 <div hidden id="analysis">
-<h2>2. 분석 메뉴 선택</h2>
-<div class="tabbar" role="tablist">
-<button type="button" class="tab-btn" role="tab" data-tab="explorer">원자료 탐색</button>
-<button type="button" class="tab-btn" role="tab" data-tab="simulation">시뮬레이션</button>
-<button type="button" class="tab-btn" role="tab" data-tab="linkage">연쇄효과 분석</button>
-</div>
-
-<section id="explorer">
+<section class="panel" id="explorer">
 <h2>원자료 탐색</h2>
 <p>선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
 <div class="row-tools">
@@ -91,7 +49,7 @@
 <p class="note">스크롤하여 전체 열을 볼 수 있습니다. 금액표의 일반 데이터 단위는 백만원입니다. 구성비·유발계수 등 요약 행은 행 명칭을 우선 확인하세요.</p>
 </section>
 
-<section id="simulation">
+<section class="panel" id="simulation">
 <h2>국내 생산물 최종수요 증가 시뮬레이션</h2>
 <p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p>
 <label>산업 검색<input disabled id="sector-search" placeholder="산업 이름 또는 코드"/></label>
@@ -133,18 +91,17 @@
 </div>
 </section>
 
-<section id="linkage">
+<section class="panel" id="linkage">
 <h2>산업 연쇄효과 분석 (핵심산업 찾기)</h2>
-<p>생산유발계수표(Leontief 역행렬)로 계산합니다. 모두 단위 없는 비율(무차원)입니다.<br>
-영향력계수 = 열합계 ÷ 열합계 평균 (후방연쇄, 다른 산업을 끌어올리는 힘) /
+<p>생산유발계수표(Leontief 역행렬)로 계산합니다. 모두 단위 없는 비율(무차원)입니다.<br>영향력계수 = 열합계 ÷ 열합계 평균 (후방연쇄, 다른 산업을 끌어올리는 힘) /
 감응도계수 = 행합계 ÷ 행합계 평균 (전방연쇄, 다른 산업 수요 증가에 반응하는 정도). 1보다 크면 평균 이상입니다.</p>
 <div class="cards link-cards" id="linkage-cards"></div>
-<div class="link-legend"><i style="background:#c2410c"></i>핵심산업 (영향력≥1, 감응도≥1)<i style="background:#168179"></i>그 외 산업</div>
+<div class="link-legend"><i class="k"></i>핵심산업 (영향력≥1, 감응도≥1)<i class="b"></i>그 외 산업</div>
 <div class="link-two">
 <div><h3>영향력계수 Top 10 <span class="note">— 다른 산업을 끌어올리는 힘</span></h3><div id="linkage-bars-back"></div></div>
 <div><h3>감응도계수 Top 10 <span class="note">— 다른 산업 수요에 반응하는 정도</span></h3><div id="linkage-bars-fwd"></div></div>
 </div>
-<hr style="border:0;border-top:1px solid #dce5eb;margin:22px 0">
+<hr class="rule">
 <div class="row-tools">
 <label>산업 검색<input disabled id="linkage-search" placeholder="산업 이름 또는 코드"/></label>
 <label>유형 <select disabled id="linkage-type">
@@ -170,8 +127,51 @@
 </div>
 </section>
 </div>
+
+<section class="panel welcome" id="welcome">
+<h2>분석할 산업 분류를 골라 시작하세요</h2>
+<p>분류를 고르면 해당 데이터를 불러오고, 아래 세 가지 분석을 사용할 수 있습니다.</p>
+<ul class="welcome-list">
+<li><strong>원자료 탐색</strong><span>원표의 행을 골라 각 열과의 거래액을 확인합니다.</span></li>
+<li><strong>시뮬레이션</strong><span>산업의 최종수요를 늘렸을 때 생산·수입·부가가치 변화를 계산합니다.</span></li>
+<li><strong>연쇄효과 분석</strong><span>영향력·감응도계수로 핵심산업을 찾습니다.</span></li>
+</ul>
+</section>
 </main>
 
-<footer>브라우저 계산 · GitHub Pages 배포용</footer>
+<aside class="right" aria-label="분류와 상태">
+<section class="rpanel pick">
+<h2>분석할 분류</h2>
+<p class="note" id="pick-title">고르면 해당 산업 데이터를 불러옵니다.</p>
+<div class="io-cards" role="group" aria-label="분류 선택">
+<button type="button" class="io-select-card" data-label="대분류"><div class="t">대분류</div><div class="n">33개</div><div class="s">산업 부문, 파일 0.6MB</div></button>
+<button type="button" class="io-select-card" data-label="중분류"><div class="t">중분류</div><div class="n">83개</div><div class="s">산업 부문, 파일 1.2MB</div></button>
+<button type="button" class="io-select-card" data-label="소분류"><div class="t">소분류</div><div class="n">165개</div><div class="s">산업 부문, 파일 3.1MB</div></button>
+<button type="button" class="io-select-card" data-label="기본부문"><div class="t">기본부문</div><div class="n">380개</div><div class="s">산업 부문, 파일 12.3MB</div></button>
+</div>
+</section>
+
+<section class="rpanel status-panel" aria-label="분석 준비 상태">
+<h2>데이터 상태</h2>
+<p id="status" role="status">아래 카드를 클릭하면 해당 분류 데이터가 로드됩니다.</p>
+<details>
+<summary>계수 검증 결과</summary>
+<pre id="validation">아직 자료를 불러오지 않았습니다.</pre>
+</details>
+</section>
+
+<section class="rpanel ripple-panel">
+<h2>파급 단계 예시</h2>
+<div class="ripple">
+<p class="ripple-head"><label class="ripple-pick"><span class="sr">산업 고르기</span><select id="ripple-sector"></select></label> 수요가 <strong>1,000백만원</strong> 늘면</p>
+<p class="ripple-sub">산업끼리 원료를 사고팔며 생산이 단계마다 이어집니다. (단위: 백만원)</p>
+<ol class="ripple-rows" id="ripple-rows"></ol>
+<p class="ripple-total"><span>모두 더하면</span><strong id="ripple-sum"></strong></p>
+</div>
+<p class="note ripple-note">한 산업의 수요가 늘면 재료를 대는 산업까지 차례로 생산이 늘어납니다. 합계는 최초 수요의 <strong id="ripple-mult"></strong>배(생산유발승수)입니다.</p>
+</section>
+</aside>
+
+</div>
 </body>
 </html>
